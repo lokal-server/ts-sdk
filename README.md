@@ -1,17 +1,17 @@
-# @lokal/ts-sdk
+# lokal-ts-sdk
 
 TypeScript SDK for Lokal external apps. Lokal is a self-hosted file/data hub; this SDK helps apps define a manifest, authenticate a Lokal user, register the manifest, and read/write app-private JSON data.
 
 ## Install
 
 ```sh
-npm install @lokal/ts-sdk
+npm install lokal-ts-sdk
 ```
 
 ## Define an app
 
 ```ts
-import { createLokalClient, defineLokalApp } from '@lokal/ts-sdk';
+import { createLokalClient, defineLokalApp } from 'lokal-ts-sdk';
 
 const recipeSchema = { type: 'object' };
 const settingsSchema = { type: 'object' };
@@ -91,7 +91,7 @@ const lokal = createLokalClient({
 Missing tokens throw a clear `Error`. Non-2xx API responses throw `LokalApiError` with `status`, `message`, and parsed `body` when available.
 
 ```ts
-import { LokalApiError } from '@lokal/ts-sdk';
+import { LokalApiError } from 'lokal-ts-sdk';
 
 try {
   await lokal.collection('recipes').list();
