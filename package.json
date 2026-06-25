@@ -1,5 +1,5 @@
 {
-  "name": "@lokal/ts-sdk",
+  "name": "lokal-ts-sdk",
   "version": "0.1.0",
   "description": "TypeScript SDK for Lokal external apps.",
   "license": "MIT",
