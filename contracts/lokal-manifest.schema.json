@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lokal.local/contracts/lokal-manifest.schema.json",
+  "title": "Lokal app manifest",
+  "description": "Serializable shape sent by external apps from defineLokalApp during platform authentication.",
+  "type": "object",
+  "required": ["slug", "collections"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "developerName": {
+      "type": "string"
+    },
+    "collections": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_-]+$"
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

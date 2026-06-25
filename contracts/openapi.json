@@ -1,0 +1,717 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Lokal Platform API",
+    "version": "0.1.0",
+    "description": "Contract for external apps integrating with Lokal as an app-private JSON data store."
+  },
+  "servers": [
+    {
+      "url": "{lokalUrl}",
+      "variables": {
+        "lokalUrl": {
+          "default": "https://files.example.com"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Discovery"
+    },
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "Records"
+    },
+    {
+      "name": "Values"
+    }
+  ],
+  "paths": {
+    "/.well-known/lokal": {
+      "get": {
+        "tags": ["Discovery"],
+        "operationId": "getLokalDiscovery",
+        "summary": "Discover Lokal platform capabilities",
+        "responses": {
+          "200": {
+            "description": "Lokal discovery metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/platform/auth": {
+      "post": {
+        "tags": ["Auth"],
+        "operationId": "authenticateApp",
+        "summary": "Authenticate a Lokal user and register an app manifest",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User-bound app token and registered app metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/platform/apps/{appSlug}/collections/{collection}/records": {
+      "get": {
+        "tags": ["Records"],
+        "operationId": "listRecords",
+        "summary": "List records in an app-private collection for the authenticated user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppSlug"
+          },
+          {
+            "$ref": "#/components/parameters/Collection"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Collection records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DataRecord"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Records"],
+        "operationId": "createRecord",
+        "summary": "Create a record in an app-private collection for the authenticated user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppSlug"
+          },
+          {
+            "$ref": "#/components/parameters/Collection"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordWriteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/platform/apps/{appSlug}/collections/{collection}/records/{recordId}": {
+      "get": {
+        "tags": ["Records"],
+        "operationId": "getRecord",
+        "summary": "Read one collection record",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppSlug"
+          },
+          {
+            "$ref": "#/components/parameters/Collection"
+          },
+          {
+            "$ref": "#/components/parameters/RecordId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataRecord"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Records"],
+        "operationId": "updateRecord",
+        "summary": "Update one collection record",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppSlug"
+          },
+          {
+            "$ref": "#/components/parameters/Collection"
+          },
+          {
+            "$ref": "#/components/parameters/RecordId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordWriteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataRecord"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Records"],
+        "operationId": "deleteRecord",
+        "summary": "Soft-delete one collection record",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppSlug"
+          },
+          {
+            "$ref": "#/components/parameters/Collection"
+          },
+          {
+            "$ref": "#/components/parameters/RecordId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/platform/apps/{appSlug}/collections/{collection}/value": {
+      "get": {
+        "tags": ["Values"],
+        "operationId": "getCollectionValue",
+        "summary": "Read the singleton value for a collection",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppSlug"
+          },
+          {
+            "$ref": "#/components/parameters/Collection"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stored JSON value or null",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/JsonValue"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Values"],
+        "operationId": "setCollectionValue",
+        "summary": "Set the singleton value for a collection",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AppSlug"
+          },
+          {
+            "$ref": "#/components/parameters/Collection"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValueWriteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stored singleton record",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataRecord"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "lokal_app token"
+      }
+    },
+    "parameters": {
+      "AppSlug": {
+        "name": "appSlug",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        }
+      },
+      "Collection": {
+        "name": "collection",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$"
+        }
+      },
+      "RecordId": {
+        "name": "recordId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing or invalid credentials"
+      },
+      "NotFound": {
+        "description": "Resource not found"
+      }
+    },
+    "schemas": {
+      "JsonValue": {
+        "description": "Any JSON value. App-specific shape is validated by the external app or SDK.",
+        "nullable": true
+      },
+      "LokalAppManifest": {
+        "$ref": "./lokal-manifest.schema.json"
+      },
+      "AuthRequest": {
+        "type": "object",
+        "required": ["email", "password", "manifest"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string"
+          },
+          "manifest": {
+            "$ref": "#/components/schemas/LokalAppManifest"
+          },
+          "lokalManifest": {
+            "$ref": "#/components/schemas/LokalAppManifest"
+          },
+          "app": {
+            "$ref": "#/components/schemas/LokalAppManifest"
+          },
+          "tokenName": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      },
+      "AuthResponse": {
+        "type": "object",
+        "required": ["apiBase", "app", "user", "token"],
+        "properties": {
+          "apiBase": {
+            "type": "string",
+            "format": "uri"
+          },
+          "app": {
+            "$ref": "#/components/schemas/RegisteredApp"
+          },
+          "user": {
+            "$ref": "#/components/schemas/LokalUser"
+          },
+          "token": {
+            "$ref": "#/components/schemas/AppTokenWithSecret"
+          }
+        }
+      },
+      "DiscoveryResponse": {
+        "type": "object",
+        "required": ["issuer", "apiBase", "features"],
+        "properties": {
+          "issuer": {
+            "type": "string",
+            "format": "uri"
+          },
+          "apiBase": {
+            "type": "string",
+            "format": "uri"
+          },
+          "contracts": {
+            "type": "object",
+            "properties": {
+              "openapi": {
+                "type": "string"
+              },
+              "manifestSchema": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "features": {
+            "type": "object",
+            "properties": {
+              "auth": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "files": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegisteredApp": {
+        "type": "object",
+        "required": ["id", "name", "slug", "clientId", "manifest"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "manifest": {
+            "$ref": "#/components/schemas/LokalAppManifest"
+          }
+        },
+        "additionalProperties": true
+      },
+      "LokalUser": {
+        "type": "object",
+        "required": ["id", "name", "email", "role"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "AppTokenWithSecret": {
+        "type": "object",
+        "required": ["id", "name", "scopes", "createdAt", "type", "rawToken"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["data:read", "data:write"]
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "type": {
+            "type": "string",
+            "const": "Bearer"
+          },
+          "rawToken": {
+            "type": "string",
+            "pattern": "^lokal_app_"
+          }
+        }
+      },
+      "DataRecord": {
+        "type": "object",
+        "required": ["id", "appId", "ownerId", "collection", "value", "version", "createdAt", "updatedAt"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "appId": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "collection": {
+            "type": "string"
+          },
+          "key": {
+            "type": ["string", "null"]
+          },
+          "value": {
+            "$ref": "#/components/schemas/JsonValue"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deletedAt": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": true
+      },
+      "RecordWriteRequest": {
+        "description": "Either send { value, key? } or send any JSON value directly. The SDK should prefer { value }.",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": ["string", "null"]
+              },
+              "value": {
+                "$ref": "#/components/schemas/JsonValue"
+              }
+            },
+            "required": ["value"],
+            "additionalProperties": true
+          },
+          {
+            "$ref": "#/components/schemas/JsonValue"
+          }
+        ]
+      },
+      "ValueWriteRequest": {
+        "description": "Either send { value } or send any JSON value directly. The SDK should prefer { value }.",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "value": {
+                "$ref": "#/components/schemas/JsonValue"
+              }
+            },
+            "required": ["value"],
+            "additionalProperties": true
+          },
+          {
+            "$ref": "#/components/schemas/JsonValue"
+          }
+        ]
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "required": ["success"],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
